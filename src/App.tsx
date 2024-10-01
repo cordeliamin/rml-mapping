@@ -1,9 +1,8 @@
-import './App.css'
+// import './App.css'
 import { Grid, GridItem, Box } from '@chakra-ui/react'
+import MappingPane from './MappingPane';
 
 function App() {
-  // const [count, setCount] = useState(0)
-
   return (
     <Box
       display="grid"
@@ -14,8 +13,8 @@ function App() {
         templateAreas={`"header header"
                   "upload-pane mapping-pane"
                   "footer footer"`}
-        gridTemplateRows={'50px 1fr 30px'}
-        gridTemplateColumns={'1fr 3fr'}
+        gridTemplateRows={'80px 1fr 40px'}
+        gridTemplateColumns={'200px 1fr'}
         gap='1'
         color='blackAlpha.700'
         fontWeight='bold'
@@ -29,7 +28,7 @@ function App() {
           Nav
         </GridItem>
         <GridItem pl='2' bg='green.300' area={'mapping-pane'}>
-          Main
+          <MappingPane />
         </GridItem>
         <GridItem pl='2' bg='blue.300' area={'footer'}>
           Footer
