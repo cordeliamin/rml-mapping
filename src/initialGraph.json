@@ -1,0 +1,23 @@
+{
+  "abstract-values": [
+    "av1"
+  ],
+  "realized-goals": [
+    "rg1"
+  ],
+  "undesirable-properties": [
+    "up1"
+  ],
+  "interventions": [
+    "iv1"
+  ],
+  "known-assumptions": [
+    "ka1"
+  ],
+  "edges": [
+    {
+      "source": "ka1",
+      "target": "iv1"
+    }
+  ]
+}

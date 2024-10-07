@@ -1,4 +1,9 @@
 import CytoscapeComponent from 'react-cytoscapejs';
+import { GraphData } from './App';
+
+interface MappingPaneProps {
+  graphData: GraphData
+}
 
 const layout = {
   name: 'breadthfirst',
@@ -19,7 +24,7 @@ const layout = {
   // transform: function(node, position) { return position; } // transform a given node position. Useful for changing flow direction in discrete layouts
 }
 
-function MappingPane() {
+function MappingPane: React.FC<MappingPaneProps>({ graphData: GraphData }) {
   const elements = [
     { data: { id: 'n1', label: 'Node 1' }, position: { x: 0, y: 0 } },
     { data: { id: 'n2', label: 'Node 2' }, position: { x: 0, y: 100 } },
