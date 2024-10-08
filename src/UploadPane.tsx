@@ -12,26 +12,36 @@ const UploadJsonModal: React.FC<UploadJsonProps> = ({ setGraphData }) => {
   const [file, setFile] = useState<File | null>(null);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFile = event.target.files![0];
-    if (selectedFile && selectedFile.type === 'application/json') {
-      setFile(selectedFile);
-    }
-    else {
-      alert("Please upload a valid JSON file.");
+    if (event.target.files && event.target.files.length > 0) {
+      setFile(event.target.files[0]); // Save the selected file to state
     }
   }
 
   const handleUpload = () => {
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const jsonData = JSON.parse(e.target!.result);
-        setGraphData(jsonData);
-      };
-      reader.readAsText(file);
-      onClose();
+    if (!file) {
+      return
     }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const content = event.target?.result as string;
+
+      try {
+        const jsonData: GraphData = JSON.parse(content); // Parse the JSON file
+        setGraphData(jsonData); // Update the GraphData in the parent component
+        onClose(); // Close the modal after successful upload
+      } catch (error) {
+        console.error("Failed to parse JSON:", error);
+        // TODO: Show an error message to the user
+      }
+    }
+    reader.onerror = () => {
+      console.error("File reading has failed"); // Log file read errors
+    };
+
+    reader.readAsText(file); // Read the file as text
   }
+
   return (
     <>
       <Button onClick={onOpen}>Upload</Button>
@@ -47,7 +57,7 @@ const UploadJsonModal: React.FC<UploadJsonProps> = ({ setGraphData }) => {
           </ModalBody>
 
           <ModalFooter>
-            <Button onClick={handleUpload}>
+            <Button onClick={handleUpload} isDisabled={!file}>
               Upload
             </Button>
             <Button variant="ghost" onClick={onClose}>Cancel</Button>

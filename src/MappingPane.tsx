@@ -1,5 +1,9 @@
 import CytoscapeComponent from 'react-cytoscapejs';
 import { GraphData } from './App';
+import cytoscape from 'cytoscape';
+import edgehandles from 'cytoscape-edgehandles';
+
+cytoscape.use(edgehandles);
 
 interface MappingPaneProps {
   graphData: GraphData
@@ -24,16 +28,75 @@ const layout = {
   // transform: function(node, position) { return position; } // transform a given node position. Useful for changing flow direction in discrete layouts
 }
 
-function MappingPane: React.FC<MappingPaneProps>({ graphData: GraphData }) {
-  const elements = [
-    { data: { id: 'n1', label: 'Node 1' }, position: { x: 0, y: 0 } },
-    { data: { id: 'n2', label: 'Node 2' }, position: { x: 0, y: 100 } },
-    { data: { id: 'n3', label: 'Node 3' }, position: { x: 0, y: 100 } },
-    { data: { source: 'n1', target: 'n2', label: 'Edge from Node1 to Node2' }, },
-    { data: { source: 'n1', target: 'n3', label: 'Edge from Node1 to Node3' }, },
+// Create cytoscape ElementDefinitions from the graph data
+const parseGraphData = (graphData: GraphData): cytoscape.ElementDefinition[] => {
+  const elements: cytoscape.ElementDefinition[] = [];
+
+  // Create nodes for each category
+  const nodeCategories = [
+    { key: 'abstract-values', label: 'Abstract Value' },
+    { key: 'realized-goals', label: 'Realized Goal' },
+    { key: 'undesirable-properties', label: 'Undesirable Property' },
+    { key: 'interventions', label: 'Intervention' },
+    { key: 'known-assumptions', label: 'Known Assumption' }
   ];
+
+  nodeCategories.forEach(category => {
+    const values = graphData[category.key as keyof GraphData] as string[];
+    values.forEach((value) => {
+      elements.push({
+        data: {
+          id: value,
+          label: value, // Optional label for nodes
+        },
+        group: 'nodes', // Defines this element as a node
+      });
+    });
+  });
+
+  // Create edges from the "edges" array
+  graphData.edges.forEach((edge) => {
+    elements.push({
+      data: {
+        id: `edge-${edge.source}-${edge.target}`, // Unique ID for each edge
+        source: edge.source, // ID of the source node
+        target: edge.target, // ID of the target node
+      },
+      group: 'edges', // Defines this element as an edge
+    });
+  });
+
+  return elements;
+};
+
+let cyRef = cytoscape();
+const eh = cyRef.edgehandles({
+  canConnect: function(sourceNode, targetNode) {
+    // whether an edge can be created between source and target
+    return !sourceNode.same(targetNode); // e.g. disallow loops
+  },
+  edgeParams: function(sourceNode, targetNode) {
+    // for edges between the specified source and target
+    // return element object to be passed to cy.add() for edge
+    const edgeId = `edge-${sourceNode.id()}-${targetNode.id()}`;
+    return {
+      data: {
+        id: edgeId,          // Unique ID for the edge
+        source: sourceNode.id(),  // Source node ID
+        target: targetNode.id()   // Target node ID
+      },
+      group: 'edges'  // Defines this element as an edge
+    };
+  },
+});
+
+eh.enable(); // Enable edge handles
+eh.enableDrawMode();
+
+const MappingPane: React.FC<MappingPaneProps> = ({ graphData }) => {
+  const elements = parseGraphData(graphData);
   return (
-    <CytoscapeComponent elements={elements} style={{ width: '100%', height: '100%' }} layout={layout} />
+    <CytoscapeComponent elements={elements} style={{ width: '100%', height: '100%' }} layout={layout} autoungrabify={true} userPanningEnabled={false} cy={(cy) => { cyRef = cy }} />
   );
 }
 

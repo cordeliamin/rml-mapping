@@ -47,7 +47,7 @@ function App() {
           <UploadPane setGraphData={setGraphData} />
         </GridItem>
         <GridItem pl='2' bg='green.300' area={'mapping-pane'}>
-          <MappingPane />
+          <MappingPane graphData={graphData} />
         </GridItem>
         <GridItem pl='2' bg='blue.300' area={'footer'}>
           Footer
