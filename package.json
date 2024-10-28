@@ -13,6 +13,8 @@
     "@chakra-ui/react": "^2.8.2",
     "@emotion/react": "^11.13.3",
     "@emotion/styled": "^11.13.0",
+    "@types/cytoscape-popper": "^2.0.4",
+    "cytoscape-popper": "^4.0.1",
     "framer-motion": "^11.9.0",
     "react": "^18.3.1",
     "react-cytoscapejs": "^2.0.0",

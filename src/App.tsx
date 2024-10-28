@@ -7,7 +7,7 @@ import { useState } from 'react';
 
 export interface Edge {
   "source": string,
-  "target": string,
+  "targets": string[],
 }
 
 export interface GraphData {

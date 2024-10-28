@@ -17,7 +17,15 @@
   "edges": [
     {
       "source": "ka1",
-      "target": "iv1"
+      "targets": ["iv1"]
+    },
+    {
+      "source": "iv1",
+      "targets": ["up1"]
+    },
+    {
+      "source": "up1",
+      "targets": ["rg1"]
     }
   ]
 }
