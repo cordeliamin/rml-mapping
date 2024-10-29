@@ -1,52 +1,47 @@
 import CytoscapeComponent from 'react-cytoscapejs';
-import { GraphData } from './App';
-import cytoscape from 'cytoscape';
+import { Category, GraphData } from './App';
+import cytoscape, { NodeSingular } from 'cytoscape';
 import edgehandles from 'cytoscape-edgehandles';
+import dagre from 'cytoscape-dagre';
 
 cytoscape.use(edgehandles);
+cytoscape.use(dagre);
 
 interface MappingPaneProps {
   graphData: GraphData;
 }
+const categoryRankMap: Record<Category, number> = {
+  'abstract-values': 0,
+  'realized-goals': 1,
+  'undesirable-properties': 2,
+  'interventions': 3,
+  'known-assumptions': 4,
+}
 
-// const layout = {
-//   name: 'dagre',
-//   rankDir: 'TB', // Top-to-bottom direction
-//   ranker: 'network-simplex',
-//   rank: (node: NodeSingular) => {
-//     const category = node.data("category");
-//     if (category === 'known-assumptions') return 0; // Bottom-most layer
-//     if (category === 'interventions') return 1;
-//     if (category === 'undesirable-properties') return 2;
-//     if (category === 'realized-goals') return 3;
-//     if (category === 'abstract-values') return 4; // Top-most layer
-//   },
-// };
+// Use the dagre layout for x positioning, but set y positions based on category
+const layout = {
+  name: 'dagre',
+  transform: (node: NodeSingular, pos: cytoscape.Position) => {
+    const nodeCategory = node.data("category") as Category;
+    return {
+      x: pos.x,
+      y: (categoryRankMap[nodeCategory] + 1) * 100
+    }
+  }
+};
 
-// Create cytoscape ElementDefinitions from the graph data
 const parseGraphData = (graphData: GraphData): cytoscape.ElementDefinition[] => {
   const elements: cytoscape.ElementDefinition[] = [];
 
-  const nodeCategories = [
+  const nodeCategories: Category[] = [
     'abstract-values',
     'realized-goals',
     'undesirable-properties',
     'interventions',
     'known-assumptions',
   ];
-  //
-  // Categories and their corresponding y positions
-  const categoryPositions: { [key: string]: number } = {
-    'abstract-values': 100, // Top row
-    'realized-goals': 200,
-    'undesirable-properties': 300,
-    'interventions': 400,
-    'known-assumptions': 500, // Bottom row
-  };
 
   nodeCategories.forEach(category => {
-    let xPos = 0;
-    const xSpacing = 150; // Space between nodes horizontally
     const values = graphData[category as keyof GraphData] as string[];
     values.forEach((value) => {
       elements.push({
@@ -56,13 +51,8 @@ const parseGraphData = (graphData: GraphData): cytoscape.ElementDefinition[] => 
           category: category
         },
         group: 'nodes', // Defines this element as a node
-        position: {
-          x: xPos,
-          y: categoryPositions[category]
-        },
       })
     });
-    xPos += xSpacing;
   });
 
   // Create edges
@@ -88,6 +78,7 @@ const MappingPane: React.FC<MappingPaneProps> = ({ graphData }) => {
   const initializeEdgeHandles = (cy: cytoscape.Core) => {
     const eh = cy.edgehandles({
       canConnect: function(sourceNode, targetNode) {
+        // TODO: enforce edge connection rules
         return !sourceNode.same(targetNode); // Disallow self-loops
       },
       edgeParams: function(sourceNode, targetNode) {
@@ -110,16 +101,15 @@ const MappingPane: React.FC<MappingPaneProps> = ({ graphData }) => {
 
     eh.enable(); // Enable edge handles
     eh.enableDrawMode();
-    console.log('Edgehandles initialized');
   };
 
   return (
     <CytoscapeComponent
       elements={elements}
       style={{ width: '100%', height: '100%' }}
-      // userPanningEnabled={false}
-      // userZoomingEnabled={false}
-      // layout={layout}
+      userPanningEnabled={false}
+      userZoomingEnabled={false}
+      layout={layout}
       cy={(cy) => {
         initializeEdgeHandles(cy);
       }}

@@ -5,19 +5,19 @@ import MappingPane from './MappingPane';
 import UploadPane from './UploadPane';
 import { useState } from 'react';
 
+export type Category = 'abstract-values' | 'realized-goals'
+  | 'undesirable-properties' | 'interventions' | 'known-assumptions';
+
 export interface Edge {
   "source": string,
   "targets": string[],
 }
 
-export interface GraphData {
-  "abstract-values": string[],
-  "realized-goals": string[],
-  "undesirable-properties": string[],
-  "interventions": string[],
-  "known-assumptions": string[],
+export type GraphData = {
+  [key in Category]: string[];
+} & {
   "edges": Edge[],
-}
+};
 
 function App() {
   const [graphData, setGraphData] = useState<GraphData>(initialGraph);
